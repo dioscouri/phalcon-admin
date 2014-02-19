@@ -7,11 +7,26 @@ class Routes extends \Phalcon\Mvc\Router\Group
     {
         //Default paths
         $this->setPaths(array(
-            'module' => 'admin',
+            'module' => 'phalcon-admin',
             'namespace' => 'Dsc\Admin\Controllers\\'
         ));
 
         //All the routes start with /admin
         $this->setPrefix('/admin');
+        
+        $this->add('', array(
+                'controller' => 'Dashboard',
+                'action' => 'index'
+        ));
+        
+        $this->add('/session/login', array(
+                'controller' => 'Session',
+                'action' => 'login'
+        ));
+        
+        $this->add('/session/logout', array(
+                'controller' => 'Session',
+                'action' => 'logout'
+        ));
 	}
 }
