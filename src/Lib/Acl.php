@@ -99,6 +99,8 @@ class Acl extends \Phalcon\Mvc\User\Component
             return $this->acl;
         }
 
+        apc_clear_cache();
+        
         // Check if the ACL is in APC
         if (function_exists('apc_fetch')) {
             $acl = apc_fetch('phalcon-admin-acl');
@@ -109,21 +111,13 @@ class Acl extends \Phalcon\Mvc\User\Component
         }
 
         // Check if the ACL is already generated
-        $data = $this->mongo_cache->get('phalcon-admin-acl');
-        if (!empty($data)) 
+        $data = unserialize( $this->mongo_cache->get('phalcon-admin-acl') );
+        if (empty($data)) 
         {
             $this->acl = $this->rebuild();
             return $this->acl;        	
         }
-        /*
-        if (!file_exists(APP_DIR . $this->filePath)) {
-            $this->acl = $this->rebuild();
-            return $this->acl;
-        }*/
-
-        // Get the ACL from the cache
-        //$data = file_get_contents(APP_DIR . $this->filePath);
-        //$this->acl = unserialize($data);
+        
         $this->acl = $data;
 
         // Store the ACL in APC
@@ -190,10 +184,8 @@ class Acl extends \Phalcon\Mvc\User\Component
         	array('active' => 'Y')
         ));
 
-        array_unshift( $profiles, array(
-        	'name' => 'super',
-        	'active' => 'Y'
-        ) );
+        $acl->addRole(new \Phalcon\Acl\Role('super'));
+        $acl->allow('super', '*', '*');
         
         foreach ($profiles as $profile) {
             $acl->addRole(new \Phalcon\Acl\Role($profile->name));
@@ -215,27 +207,12 @@ class Acl extends \Phalcon\Mvc\User\Component
             $acl->allow($profile->name, 'users', 'changePassword');
         }
 
-        $this->mongo_cache->save('phalcon-admin-acl', $acl);
+        $this->mongo_cache->save('phalcon-admin-acl', serialize($acl));
         
         // Store the ACL in APC
         if (function_exists('apc_store')) {
             apc_store('phalcon-admin-acl', $acl);
         }
-        
-        /*
-        if (touch(APP_DIR . $this->filePath) && is_writable(APP_DIR . $this->filePath)) {
-
-            file_put_contents(APP_DIR . $this->filePath, serialize($acl));
-
-            // Store the ACL in APC
-            if (function_exists('apc_store')) {
-                apc_store('phalcon-admin-acl', $acl);
-            }
-        } else {
-            $this->flash->error(
-                'The user does not have write permissions to create the ACL list at ' . APP_DIR . $this->filePath
-            );
-        }*/
 
         return $acl;
     }

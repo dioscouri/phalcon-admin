@@ -35,7 +35,7 @@ class BaseAuth extends \Dsc\Admin\Controllers\Base
             return false;
         }
         
-        $this->flash->notice( \Dsc\Phalcon\Debug::dump( $identity ) );
+        $this->flash->notice( \Dsc\Lib\Debug::dump( $identity ) );
         
         // Check if the user have permission to the current option
         $actionName = $dispatcher->getActionName();
