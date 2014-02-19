@@ -21,7 +21,7 @@ class UserControlController extends Base
     public function indexAction()
     {
         $this->view->disable();
-        echo $this->theme->renderTheme('Admin/Views::Users/changePassword');
+        echo $this->theme->renderTheme('Admin/Views::Users/index');
     }
 
     /**

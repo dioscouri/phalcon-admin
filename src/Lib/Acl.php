@@ -99,6 +99,7 @@ class Acl extends \Phalcon\Mvc\User\Component
             return $this->acl;
         }
 
+        // TODO Remove this
         apc_clear_cache();
         
         // Check if the ACL is in APC
@@ -184,8 +185,11 @@ class Acl extends \Phalcon\Mvc\User\Component
         	array('active' => 'Y')
         ));
 
+        // give super profile access to everything
         $acl->addRole(new \Phalcon\Acl\Role('super'));
         $acl->allow('super', '*', '*');
+        // give everyone access to the dashboard
+        //$acl->allow('*', 'Dashboard', 'index');
         
         foreach ($profiles as $profile) {
             $acl->addRole(new \Phalcon\Acl\Role($profile->name));

@@ -24,8 +24,6 @@ class BaseAuth extends \Dsc\Admin\Controllers\Base
         if (!is_array($identity)) {
         
             $this->flashSession->warning('Please sign in.');
-            
-            //return $this->response->redirect("admin/session/login");
         
             $dispatcher->forward(array(
                 'controller' => 'session',
@@ -35,7 +33,7 @@ class BaseAuth extends \Dsc\Admin\Controllers\Base
             return false;
         }
         
-        $this->flash->notice( \Dsc\Lib\Debug::dump( $identity ) );
+        //$this->flash->notice( \Dsc\Lib\Debug::dump( $identity ) );
         
         // Check if the user have permission to the current option
         $actionName = $dispatcher->getActionName();
@@ -45,13 +43,13 @@ class BaseAuth extends \Dsc\Admin\Controllers\Base
         
             if ($this->acl->isAllowed($identity['profile'], $controllerName, 'index')) {
                 $dispatcher->forward(array(
-                                'controller' => $controllerName,
-                                'action' => 'index'
+                    'controller' => $controllerName,
+                    'action' => 'index'
                 ));
             } else {
                 $dispatcher->forward(array(
-                                'controller' => 'user_control',
-                                'action' => 'index'
+                    'controller' => 'UserControl',
+                    'action' => 'index'
                 ));
             }
         
