@@ -24,16 +24,16 @@ class UsersController extends BaseAuth
         $this->persistent->conditions = null;
         $this->view->form = new UsersForm();
         
-        //$this->view->model = new Users;
+        $this->view->model = new Users;
         
-        $this->view->state = Users::populateState();
-        $this->view->page = Users::paginate(); 
+        $this->view->state = $this->view->model->populateState()->getState();
+        $this->view->params = $this->view->model->getParam();
+        $this->view->page = $this->view->model->paginate(); 
         
-        $users = Users::find();
-        echo \Dsc\Lib\Debug::dump( $users );
-        echo \Dsc\Lib\Debug::dump( Users::getItems() );
-        echo \Dsc\Lib\Debug::dump( $this->view->page );
+        //$users = Users::find();
+        //echo \Dsc\Lib\Debug::dump( $users );
         //echo \Dsc\Lib\Debug::dump( $this->view->page );
+        //echo \Dsc\Lib\Debug::dump( $this->view->params );
         
         //$this->flash->notice( \Dsc\Lib\Debug::dump( $this->view->page ) );
         
@@ -73,7 +73,7 @@ class UsersController extends BaseAuth
          * 
          */
         
-        //echo $this->theme->renderTheme('Admin/Views::Users/index');
+        echo $this->theme->renderTheme('Admin/Views::Users/index');
     }
 
     /**

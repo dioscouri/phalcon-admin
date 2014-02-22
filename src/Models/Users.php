@@ -177,13 +177,13 @@ class Users extends \Dsc\Lib\Collection
         */
     }
     
-    protected static function fetchConditions( $state )
+    protected function fetchConditions()
     {
-        parent::fetchConditions( $state );
+        parent::fetchConditions();
         
-        $filter_username = $state->get('filter.username');
+        $filter_username = $this->getState('filter.username');
         if (strlen($filter_username)) {
-            static::setCondition( 'username', $filter_username );
+            $this->setCondition( 'username', $filter_username );
         }        
     }
 }
