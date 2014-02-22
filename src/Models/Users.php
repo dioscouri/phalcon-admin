@@ -1,26 +1,38 @@
 <?php
 namespace Dsc\Admin\Models;
 
-use Phalcon\Mvc\Model\Validator\Uniqueness;
+use Dsc\Lib\Validator\Mongo\Uniqueness;
 
 /**
  * Dsc\Admin\Models\Users
  * All the users registered in the application
  */
-class Users extends \Phalcon\Mvc\Collection
+class Users extends \Dsc\Lib\Collection
 {
 
     /**
      *
      * @var integer
      */
-    public $id;
+    public $_id;
 
     /**
      *
      * @var string
      */
-    public $name;
+    public $username;
+    
+    /**
+     *
+     * @var string
+     */
+    public $first_name;
+    
+    /**
+     *
+     * @var string
+     */
+    public $last_name;
 
     /**
      *
@@ -101,7 +113,7 @@ class Users extends \Phalcon\Mvc\Collection
      */
     public function afterSave()
     {
-        if ($this->active == 'N') {
+        if ($this->active == 'N' && $this->email) {
 
             $emailConfirmation = new EmailConfirmations();
 
@@ -120,10 +132,16 @@ class Users extends \Phalcon\Mvc\Collection
      */
     public function validation()
     {
-        $this->validate(new Uniqueness(array(
-            "field" => "email",
-            "message" => "The email is already registered"
-        )));
+        $uniqueness = new Uniqueness(
+                array(
+                         'collection' => $this->getSource(),
+                         'field' => 'email', // accepts dot.notation
+                         'message' => 'This email is already registered',
+                     ),
+                $this->getDI()->get('mongo')
+        );
+                
+        $this->validate($uniqueness);
 
         return $this->validationHasFailed() != true;
     }
@@ -157,5 +175,15 @@ class Users extends \Phalcon\Mvc\Collection
             )
         ));
         */
+    }
+    
+    protected static function fetchConditions( $state )
+    {
+        parent::fetchConditions( $state );
+        
+        $filter_username = $state->get('filter.username');
+        if (strlen($filter_username)) {
+            static::setCondition( 'username', $filter_username );
+        }        
     }
 }

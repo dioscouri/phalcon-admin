@@ -1,5 +1,5 @@
 <?php
-namespace Vokuro\Forms;
+namespace Dsc\Admin\Forms;
 
 use Phalcon\Forms\Form;
 use Phalcon\Forms\Element\Text;
@@ -7,7 +7,7 @@ use Phalcon\Forms\Element\Hidden;
 use Phalcon\Forms\Element\Select;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Email;
-use Vokuro\Models\Profiles;
+use Dsc\Admin\Models\Profiles;
 
 class UsersForm extends Form
 {
@@ -24,17 +24,41 @@ class UsersForm extends Form
 
         $this->add($id);
 
-        $name = new Text('name', array(
-            'placeholder' => 'Name'
+        $username = new Text('username', array(
+                        'placeholder' => 'Username'
+        ));
+        
+        $username->addValidators(array(
+                        new PresenceOf(array(
+                                        'message' => 'Username is required'
+                        ))
+        ));
+        
+        $this->add($username);
+        
+        $first_name = new Text('first_name', array(
+            'placeholder' => 'First name'
         ));
 
-        $name->addValidators(array(
+        $first_name->addValidators(array(
             new PresenceOf(array(
-                'message' => 'The name is required'
+                'message' => 'First name is required'
             ))
         ));
 
-        $this->add($name);
+        $this->add($first_name);
+        
+        $last_name = new Text('last_name', array(
+                        'placeholder' => 'Last name'
+        ));
+        
+        $last_name->addValidators(array(
+                        new PresenceOf(array(
+                                        'message' => 'Last name is required'
+                        ))
+        ));
+        
+        $this->add($last_name);
 
         $email = new Text('email', array(
             'placeholder' => 'Email'
@@ -51,7 +75,9 @@ class UsersForm extends Form
 
         $this->add($email);
 
-        $this->add(new Select('profilesId', Profiles::find('active = "Y"'), array(
+        $this->add(new Select('profilesId', Profiles::find(array(
+        	array('active' => 'Y')
+        )), array(
             'using' => array(
                 'id',
                 'name'

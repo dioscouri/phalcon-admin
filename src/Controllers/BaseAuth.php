@@ -39,7 +39,7 @@ class BaseAuth extends \Dsc\Admin\Controllers\Base
         $actionName = $dispatcher->getActionName();
         if (!$this->acl->isAllowed($identity['profile'], $controllerName, $actionName)) {
         
-            $this->flash->warning('You don\'t have access to this module: ' . $controllerName . ':' . $actionName);
+            $this->flash->warning('You don\'t have access to: ' . $controllerName . ' : ' . $actionName);
         
             if ($this->acl->isAllowed($identity['profile'], $controllerName, 'index')) {
                 $dispatcher->forward(array(
@@ -48,7 +48,7 @@ class BaseAuth extends \Dsc\Admin\Controllers\Base
                 ));
             } else {
                 $dispatcher->forward(array(
-                    'controller' => 'UserControl',
+                    'controller' => 'User_Control',
                     'action' => 'index'
                 ));
             }

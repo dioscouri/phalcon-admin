@@ -1,39 +1,206 @@
-{{ content() }}
-
-<div align="right">
-    {{ link_to("users/create", "<i class='icon-plus-sign'></i> Create Users", "class": "btn btn-primary") }}
+<div class="row">
+	<div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+		<h1 class="page-title txt-color-blueDark">
+			<i class="fa fa-table fa-fw "></i> 
+				Users 
+			<span> > 
+				List
+			</span>
+		</h1>
+	</div>
+	<div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+        <ul id="sparks" class="list-actions list-unstyled list-inline">
+            <li>
+                <a class="btn btn-default" href="<?php echo $this->url->get(array('for'=>'create-user')); ?>">Add New</a>
+            </li>
+        </ul>            	
+	</div>
 </div>
 
-<form method="post" action="{{ url("users/search") }}" autocomplete="off">
+<section class="item-list widget-body">
 
-    <div class="center scaffold">
-
-        <h2>Search users</h2>
-
-        <div class="clearfix">
-            <label for="id">Id</label>
-            {{ form.render("id") }}
+    <form id="list-form" action="./admin/users" method="post">
+    <div class="no-padding">
+        <input type="hidden" name="list[order]" value="<?php echo $this->view->state->get('list.order'); ?>" />
+        <input type="hidden" name="list[direction]" value="<?php echo $this->view->state->get('list.direction'); ?>" />    
+    
+        <div class="row">
+            <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+                <ul class="list-actions list-unstyled list-inline">
+                    <li>
+                        <a class="btn btn-link">Quicklink Filter</a>
+                    </li>
+                    <li>
+                        <a class="btn btn-link">Quicklink Filter</a>
+                    </li>                    
+                </ul>            
+            </div>
+            <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+                <div class="input-group">
+                    <input class="form-control" type="text" name="filter[keyword]" placeholder="Search..." maxlength="200" value="<?php echo $this->view->state->get('filter.keyword'); ?>"> 
+                    <span class="input-group-btn">
+                        <input class="btn btn-primary" type="submit" onclick="this.form.submit();" value="Search" />
+                        <button class="btn btn-danger" type="button" onclick="Dsc.resetFormFilters(this.form);">Reset</button>
+                    </span>
+                </div>
+            </div>
         </div>
-
-        <div class="clearfix">
-            <label for="name">Name</label>
-            {{ form.render("name") }}
+        
+        <div class="widget-body-toolbar">
+             
+            <div class="row table-actions">
+                <div class="col-xs-12 col-sm-5 col-md-5 col-lg-4">
+                    <div class="input-group">
+                        <select id="bulk-actions" name="bulk_action" class="form-control">
+                            <option value="null">-Bulk Actions-</option>
+                            <option value="delete" data-action="./admin/users/delete">Delete</option>
+                        </select>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default bulk-actions" type="button" data-target="bulk-actions">Apply</button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-7 col-md-7 col-lg-8">
+                    <div class="pull-right">
+                        <div class="row row-marginless">
+                            <?php if (!empty($this->view->page->items)) { ?>
+                            <div class="col-sm-4">
+                                <?php //echo $this->view->page->getLimitBox( $this->view->state->get('list.limit') ); ?>
+                            </div>
+                            <?php } ?>
+            				<?php if (!empty($this->view->page->total_items) && $this->view->page->total_items > 1) { ?>                                
+                            <div class="col-sm-8">
+                                <?php //echo $this->view->page->serve(); ?>
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                        
         </div>
-
-        <div class="clearfix">
-            <label for="email">E-Mail</label>
-            {{ form.render("email") }}
+        <!-- /.widget-body-toolbar -->
+        
+        <div class="table-responsive datatable dt-wrapper dataTables_wrapper">
+        
+            <table class="table table-striped table-bordered table-hover table-highlight table-checkable">
+        		<thead>
+        			<tr>
+        				<th class="checkbox-column"><input type="checkbox" class="icheck-input"></th>
+                        <th data-sortable="username">Username</th>
+                        <th data-sortable="email">Email</th>
+                        <th>First Name</th>
+                        <th data-sortable="last_name">Last Name</th>
+                        <th>Groups</th>
+                        <th></th>
+                    </tr>
+        			<tr class="filter-row">
+        				<th></th>
+                        <th>
+                            <input placeholder="Username" name="filter[username-contains]" value="<?php echo $this->view->state->get('filter.username-contains'); ?>" type="text" class="form-control input-sm">
+                        </th>
+                        <th>
+                            <input placeholder="Email" name="filter[email-contains]" value="<?php echo $this->view->state->get('filter.email-contains'); ?>" type="text" class="form-control input-sm">
+                        </th>
+                        <th></th>
+                        <th></th>
+                        <th>
+                        <?php /* ?>
+                        <select  id="group_filter" name="filter[group]" class="form-control" >
+                        <option value="">-Group Filter-</option>
+                        <?php foreach ($groups as $group) : ?>
+                        <option <?php if($this->view->state->get('filter.group') == $group->id) { echo 'selected'; } ?> value="<?=$group->_id;?>"><?=$group->name;?></option>
+                        <?php endforeach; ?>
+                        </select>
+                        */ ?>
+                        </th>
+                        <th><button class="btn " type="sumbit">Filter</button></th>
+                    </tr>
+        		</thead>
+        		<tbody>    
+                
+                <?php if (!empty($this->view->page->items)) { ?>
+            
+                    <?php foreach ($this->view->page->items as $item) { ?>
+                        <tr>
+        	                <td class="checkbox-column">
+        	                    <input type="checkbox" class="icheck-input" name="ids[]" value="<?php echo $item->id; ?>">
+        	                </td>                
+                            <td class="">
+                            	<h5>
+                                <a href="./admin/users/edit/<?php echo $item->id; ?>">
+                                    <?php echo $item->username; ?>
+                                </a>
+                                </h5>
+                            </td>
+                            <td class="">
+                                <?php echo $item->email; ?>
+                            </td>
+                            <td class="">
+                                <?php echo $item->first_name; ?>
+                            </td>
+                            <td class="">
+                                <?php echo $item->last_name; ?>
+                            </td>
+                            <td class="">
+                            <ul>
+                            <?php if(!empty($item->groups)) : ?> 
+                            <?php foreach ($item->groups as $group) : ?>
+                            <li id="<?=$group['id'];?>">
+                            <?=$group['name'];?>
+                            </li>
+                            <?php endforeach; ?>
+                            <?php endif; ?>
+                            </ul> 
+                                
+                            </td>
+                            <td class="text-center">
+                                <a class="btn btn-xs btn-secondary" href="./admin/users/edit/<?php echo $item->id; ?>">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+        	                    &nbsp;
+        	                    <a class="btn btn-xs btn-danger" data-bootbox="confirm" href="./admin/users/delete/<?php echo $item->id; ?>">
+        	                        <i class="fa fa-times"></i>
+        	                    </a>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                
+                <?php } else { ?>
+                    <tr>
+                    <td colspan="100">
+                        <div class="">No items found.</div>
+                    </td>
+                    </tr>
+                <?php } ?>
+        
+                </tbody>
+            </table>
+        
         </div>
-
-        <div class="clearfix">
-            <label for="profilesId">Profile</label>
-            {{ form.render("profilesId") }}
+        <!-- /.table-responsive .datatable .dt-wrapper -->
+        
+        <div class="dt-row dt-bottom-row">
+            <div class="row">
+                
+                <div class="col-sm-10">
+                    <?php if (!empty($this->view->page->total_items) && $this->view->page->total_items > 1) { ?>
+                        <?php echo (!empty($this->view->page->total_items) && $this->view->page->total_items > 1) ? null /*$this->view->page->serve()*/ : null; ?>
+                    <?php } ?>
+                    &nbsp;
+                </div>
+                
+                <div class="col-sm-2 pull-right">
+                    <div class="datatable-results-count pull-right">
+                    <?php //echo !empty($this->view->page) ? $this->view->page->getResultsCounter() : null; ?>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="clearfix">
-            {{ submit_button("Search", "class": "btn btn-primary") }}
-        </div>
-
+            
     </div>
+    <!-- /.no-padding -->
+        
+    </form>
 
-</form>
+</section>

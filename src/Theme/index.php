@@ -26,6 +26,11 @@
             <tmpl type="system.messages" />
     
             <tmpl type="view" />
+            
+            <div class='clearfix'>
+                <h3>Debugging Data (in Theme/index.php)</h3>
+                <?php echo \Dsc\Lib\Debug::dump( \Dsc\Lib\System::instance()->getSessionRegistry() ); ?>
+            </div>    
         
         </div> <!-- #content -->
 		

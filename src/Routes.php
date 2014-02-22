@@ -28,5 +28,22 @@ class Routes extends \Phalcon\Mvc\Router\Group
                 'controller' => 'Session',
                 'action' => 'logout'
         ));
+        
+        $this->add('/users', array(
+                'controller' => 'Users',
+                'action' => 'index'
+        ))->setName('list-users');
+
+        $this->add('/users/create', array(
+                'controller' => 'Users',
+                'action' => 'create'
+        ))->setName('create-user');
+        
+        $this->add('/users/edit/:params', array(
+                        'controller' => 'Users',
+                        'action' => 'edit',
+                        'params' => 1
+        ))->setName('edit-user');
+        
 	}
 }

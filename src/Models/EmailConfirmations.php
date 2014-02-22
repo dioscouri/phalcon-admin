@@ -65,19 +65,23 @@ class EmailConfirmations extends \Phalcon\Mvc\Collection
      */
     public function afterCreate()
     {
+        /*
         $this->getDI()
             ->getMail()
             ->send(array(
-            $this->user->email => $this->user->name
+            $this->email => $this->first_name . " " . $this->last_name 
         ), "Please confirm your email", 'confirmation', array(
-            'confirmUrl' => '/confirm/' . $this->code . '/' . $this->user->email
+            'confirmUrl' => '/confirm/' . $this->code . '/' . $this->email
         ));
+        */
     }
 
     public function initialize()
     {
+        /*
         $this->belongsTo('usersId', 'Dsc\Admin\Models\Users', 'id', array(
             'alias' => 'user'
         ));
+        */
     }
 }

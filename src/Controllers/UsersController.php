@@ -3,7 +3,7 @@ namespace Dsc\Admin\Controllers;
 
 use Phalcon\Tag;
 use Phalcon\Mvc\Model\Criteria;
-use Phalcon\Paginator\Adapter\Model as Paginator;
+use Dsc\Lib\Paginator;
 use Dsc\Admin\Forms\ChangePasswordForm;
 use Dsc\Admin\Forms\UsersForm;
 use Dsc\Admin\Models\Users;
@@ -13,21 +13,67 @@ use Dsc\Admin\Models\PasswordChanges;
  * Dsc\Admin\Controllers\UsersController
  * CRUD to manage users
  */
-class UsersController extends Base
+class UsersController extends BaseAuth
 {
-
-    public function initialize()
-    {
-        $this->view->setTemplateBefore('private');
-    }
-
     /**
      * Default action, shows the search form
      */
     public function indexAction()
     {
+        $this->view->disable();
         $this->persistent->conditions = null;
         $this->view->form = new UsersForm();
+        
+        //$this->view->model = new Users;
+        
+        $this->view->state = Users::populateState();
+        $this->view->page = Users::paginate(); 
+        
+        $users = Users::find();
+        echo \Dsc\Lib\Debug::dump( $users );
+        echo \Dsc\Lib\Debug::dump( Users::getItems() );
+        echo \Dsc\Lib\Debug::dump( $this->view->page );
+        //echo \Dsc\Lib\Debug::dump( $this->view->page );
+        
+        //$this->flash->notice( \Dsc\Lib\Debug::dump( $this->view->page ) );
+        
+        /*
+        $numberPage = 1;
+        if ($this->request->isPost()) {
+            $this->persistent->searchParams = array();
+        } else {
+            $numberPage = $this->request->getQuery("page", "int");
+        }
+                
+        $parameters = array();
+        if ($this->persistent->searchParams) {
+            $parameters = $this->persistent->searchParams;
+        }
+        
+        $users = Users::find($parameters);
+        //$this->flash->notice( \Dsc\Lib\Debug::dump( $users ) );
+        
+        $paginator = new Paginator(array(
+                        "data" => $users,
+                        "limit" => 10,
+                        "page" => $numberPage
+        ));
+        
+        $this->view->pagination = $paginator->getPaginate();
+        
+        //echo \Dsc\Lib\Debug::dump( $this->view->pagination->items[0] );
+        
+        
+        //echo \Dsc\Lib\Debug::dump( get_object_vars($this->view->pagination->items[0]) );
+        
+        //$this->view->pagination->items[0]->{'some.deep.nested.value'} = 'rafeee';
+        //$this->flash->notice( \Dsc\Lib\Debug::dump( $this->view->pagination->items[0]->{'some.deep.nested.value'} ) );
+        
+        //$this->flash->notice( \Dsc\Lib\Debug::dump( $this->view->pagination ) );
+         * 
+         */
+        
+        //echo $this->theme->renderTheme('Admin/Views::Users/index');
     }
 
     /**
@@ -75,11 +121,14 @@ class UsersController extends Base
             $user = new Users();
 
             $user->assign(array(
-                'name' => $this->request->getPost('name', 'striptags'),
-                'profilesId' => $this->request->getPost('profilesId', 'int'),
+                'first_name' => $this->request->getPost('first_name', 'striptags'),
+                'last_name' => $this->request->getPost('last_name', 'striptags'),
+                'username' => $this->request->getPost('username', 'striptags'),
                 'email' => $this->request->getPost('email', 'email')
             ));
 
+            $this->flash->notice( \Dsc\Lib\Debug::dump($user) );
+            
             if (!$user->save()) {
                 $this->flash->error($user->getMessages());
             } else {
@@ -91,6 +140,10 @@ class UsersController extends Base
         }
 
         $this->view->form = new UsersForm(null);
+        
+        $this->view->disable();
+        $this->view->event = \Dsc\Lib\System::instance()->trigger( 'onDisplayAdminUserEdit', array( 'item' => array(), 'tabs' => array(), 'content' => array() ) );
+        echo $this->theme->renderTheme('Admin/Views::Users/create');        
     }
 
     /**
@@ -98,7 +151,7 @@ class UsersController extends Base
      */
     public function editAction($id)
     {
-        $user = Users::findFirstById($id);
+        $user = Users::findById($id);
         if (!$user) {
             $this->flash->error("User was not found");
             return $this->dispatcher->forward(array(
@@ -132,6 +185,8 @@ class UsersController extends Base
         $this->view->form = new UsersForm($user, array(
             'edit' => true
         ));
+        
+        echo $this->theme->renderTheme('Admin/Views::Users/edit');
     }
 
     /**

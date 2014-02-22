@@ -25,7 +25,14 @@
 			<li>
 				<a href="./admin" title="Dashboard"><i class="fa fa-lg fa-fw fa-home"></i> <span class="menu-item-parent">Dashboard</span></a>
 			</li>
-
+			<li>
+				<a href="#"><i class="fa fa-lg fa-fw fa-table"></i> <span class="menu-item-parent"> Users </span></a>
+				<ul>
+					<li>
+						<a href="./admin/users">List</a>
+					</li>
+				</ul>
+			</li>
 		</ul>
 	</nav>
 	<span class="minifyme"> <i class="fa fa-arrow-circle-left hit"></i> </span>

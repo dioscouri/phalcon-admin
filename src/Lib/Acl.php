@@ -17,37 +17,11 @@ class Acl extends \Phalcon\Mvc\User\Component
     private $acl;
 
     /**
-     * The filepath of the ACL cache file from APP_DIR
-     *
-     * @var string
-     */
-    private $filePath = '/cache/acl/data.txt';
-
-    /**
      * Define the resources that are considered "private". These controller => actions require authentication.
      *
      * @var array
      */
-    private $privateResources = array(
-        'users' => array(
-            'index',
-            'search',
-            'edit',
-            'create',
-            'delete',
-            'changePassword'
-        ),
-        'profiles' => array(
-            'index',
-            'search',
-            'edit',
-            'create',
-            'delete'
-        ),
-        'permissions' => array(
-            'index'
-        )
-    );
+    private $privateResources = array();
 
     /**
      * Human-readable descriptions of the actions used in {@see $privateResources}
@@ -99,32 +73,35 @@ class Acl extends \Phalcon\Mvc\User\Component
             return $this->acl;
         }
 
-        // TODO Remove this
-        apc_clear_cache();
-        
         // Check if the ACL is in APC
+        /*
         if (function_exists('apc_fetch')) {
             $acl = apc_fetch('phalcon-admin-acl');
             if (is_object($acl) && !empty($acl)) {
                 $this->acl = $acl;
                 return $acl;
             }
-        }
+        }*/
 
         // Check if the ACL is already generated
         $data = unserialize( $this->mongo_cache->get('phalcon-admin-acl') );
         if (empty($data)) 
         {
-            $this->acl = $this->rebuild();
-            return $this->acl;        	
+            $data = $this->rebuild();       	
         }
         
-        $this->acl = $data;
-
+        // TODO Re-enable this
+        //$this->mongo_cache->save('phalcon-admin-acl', serialize($acl));
         // Store the ACL in APC
+        /*
         if (function_exists('apc_store')) {
             apc_store('phalcon-admin-acl', $this->acl);
         }
+        */
+
+        $this->acl = $data;
+        
+        //$this->mongo_cache->save('phalcon-admin-acl-memory', \Dsc\Lib\Debug::dump($this->acl, false) );
 
         return $this->acl;
     }
@@ -176,8 +153,17 @@ class Acl extends \Phalcon\Mvc\User\Component
      */
     public function rebuild()
     {
-        $acl = new \Phalcon\Acl\Adapter\Memory;
-
+        $options = array(
+        	'dbhost' => $this->config->mongo->host,
+            'dbname' => $this->config->mongo->dbname,
+            'roles' => 'acl.roles',
+            'resources' => 'acl.resources',
+            'resourcesAccesses' => 'acl.resourcesAccesses',
+            'accessList' => 'acl.accessList'
+        );
+        $acl = new \Dsc\Admin\Lib\Acl\Adapter\Mongo($options);
+        //$acl = new \Phalcon\Acl\Adapter\Memory();
+        
         $acl->setDefaultAction(\Phalcon\Acl::DENY);
 
         // Register roles
@@ -188,8 +174,7 @@ class Acl extends \Phalcon\Mvc\User\Component
         // give super profile access to everything
         $acl->addRole(new \Phalcon\Acl\Role('super'));
         $acl->allow('super', '*', '*');
-        // give everyone access to the dashboard
-        //$acl->allow('*', 'Dashboard', 'index');
+        $acl->allow('*', 'Dsc\Admin\Controllers\DashboardController', 'index');
         
         foreach ($profiles as $profile) {
             $acl->addRole(new \Phalcon\Acl\Role($profile->name));
@@ -209,13 +194,6 @@ class Acl extends \Phalcon\Mvc\User\Component
 
             // Always grant these permissions
             $acl->allow($profile->name, 'users', 'changePassword');
-        }
-
-        $this->mongo_cache->save('phalcon-admin-acl', serialize($acl));
-        
-        // Store the ACL in APC
-        if (function_exists('apc_store')) {
-            apc_store('phalcon-admin-acl', $acl);
         }
 
         return $acl;
